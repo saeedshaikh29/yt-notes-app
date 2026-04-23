@@ -1,0 +1,138 @@
+/* 🔥 GLOBAL FIX: prevents width overflow issues with padding */
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  min-height: 100vh; /* 🔥 changed from height → allows content to grow */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  gap: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 1000px;
+  margin: 0 auto; /* 🔥 ADDED: centers the entire container horizontally */
+}
+
+.heading {
+  text-align: center;
+  max-width: 600px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.input {
+  padding: 10px;
+  width: 300px;
+  font-size: 16px;
+}
+
+.button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.output {
+  margin-top: 20px;
+  padding: 20px;
+  width: 85%;
+  max-width: 1200px;
+  min-height: 100px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #fafafa;
+
+  text-align: left; /* 🔥 FIX: prevents weird centered overflow */
+
+  overflow-wrap: break-word; /* 🔥 FIX: breaks long text */
+  word-break: break-word;   /* 🔥 FIX: ensures wrapping */
+  white-space: normal;      /* 🔥 FIX: allows normal wrapping */
+  margin-bottom: 40px;
+  border: 1px solid #e0e0e0;
+}
+
+.notes {
+  text-align: left;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+.notes h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.notes ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.notes p {
+  margin-bottom: 15px;
+  color: #444;
+}
+
+.notes li {
+  margin-bottom: 8px;
+  word-break: break-word; /* 🔥 FIX: bullets won’t overflow */
+}
+.download-container {
+  display: flex;
+  justify-content: center; /* 🔥 centers horizontally */
+  margin-top: 20px;
+}
+
+.download-button {
+  padding: 10px 20px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: none;
+  background-color: #333;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-button:hover {
+  background-color: #555;
+}
+.input-group {
+  display: flex;
+  flex-direction: column; /* 🔥 ADDED: stacks input + button vertically */
+  gap: 20px;
+  align-items: center; /* 🔥 ADDED: keeps them centered */
+}
+/* 🔥 TABLET FIX: improves readability on medium screens */
+@media (min-width: 600px) and (max-width: 1024px) {
+  
+  .notes {
+    font-size: 17px; /* 🔥 ADDED: slightly larger text for tablets */
+    line-height: 1.7; /* 🔥 ADDED: better spacing between lines */
+  }
+
+  .notes h2 {
+    font-size: 26px; /* 🔥 ADDED: scale headings proportionally */
+  }
+
+  .output {
+    padding: 25px; /* 🔥 ADDED: more breathing room */
+  }
+}
+/* 🔥 iPad Pro FIX: slightly larger text only for very large tablets */
+@media (min-width: 1024px) and (max-width: 1366px) {
+
+  .notes {
+    font-size: 18px; /* 🔥 ADDED: bigger text for large tablet screens */
+    line-height: 1.75; /* 🔥 ADDED: improves readability for long content */
+  }
+
+  .notes h2 {
+    font-size: 28px; /* 🔥 ADDED: scale heading proportionally */
+  }
+
+  .output {
+    padding: 30px; /* 🔥 ADDED: more spacing for larger screen */
+  }
+}
