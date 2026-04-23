@@ -104,6 +104,6 @@ Transcript (may be partial if video is long):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
+# For testing in local running environment, useless when using Render
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
