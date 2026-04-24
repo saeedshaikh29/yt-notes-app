@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./App.css";
 import jsPDF from "jspdf";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import { saveAs } from "file-saver";
 
 // import { Linter } from "eslint";
 
@@ -9,7 +11,7 @@ function App() {
   // const [videoId, setVideoId] = useState("");
   const [notes, setNotes] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
 const handleGenerate = async () => {
   setError(""); // 🔥 clear old errors
@@ -22,10 +24,10 @@ const handleGenerate = async () => {
   }
 
   // 🔥 CHECK LIMIT BEFORE API CALL
-  if (hasReachedLimit()) {
-    setError("Free limit reached. Try again tomorrow.");
-    return;
-  }
+if (hasReachedLimit()) {
+setError("You've reached today's free limit. Try again tomorrow, or share feedback below if you'd like more access.");
+  return;
+}
 
   setLoading(true);
   setNotes(""); // clear old notes
@@ -112,6 +114,61 @@ const handleDownloadPDF = () => {
 
   doc.save(`${notes.title || "notes"}.pdf`);
 };
+const handleDownloadDOCX = async () => {
+  if (!notes || !notes.sections) return;
+
+  const doc = new Document({
+    sections: [
+      {
+        children: [
+          // Title
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: notes.title,
+                bold: true,
+                size: 32,
+              }),
+            ],
+          }),
+
+          // Summary
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\nSummary:\n",
+                bold: true,
+              }),
+              new TextRun(notes.summary),
+            ],
+          }),
+
+          // Sections
+          ...notes.sections.flatMap((section) => [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `\n${section.heading}`,
+                  bold: true,
+                }),
+              ],
+            }),
+
+            ...section.points.map(
+              (point) =>
+                new Paragraph({
+                  text: `• ${point}`,
+                })
+            ),
+          ]),
+        ],
+      },
+    ],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `${notes.title || "notes"}.docx`);
+};
 const isDev = import.meta.env.MODE === "development";
 // 🔥 DAILY LIMIT CONFIG
 const DAILY_LIMIT = 3;
@@ -188,9 +245,16 @@ const getRemaining = () => {
         {error && <div style={{ color: "red" }}>{error}</div>}
         {notes && notes.sections && (
           <div className="download-container">
+<div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
   <button onClick={handleDownloadPDF} className="button">
     Download PDF
   </button>
+
+  <button onClick={handleDownloadDOCX} className="button">
+    Download DOCX
+  </button>
+</div>
+  
   </div>
 )}
         {/* {videoId && <div>Video ID: {videoId}</div>} */}
@@ -202,15 +266,15 @@ const getRemaining = () => {
     <div className="notes">
       <h2>{notes.title}</h2>
       {notes.truncated && (
-  <div style={{ color: "orange", marginBottom: "10px" }}>
-    ⚠️ Only the first part of this long video was used to generate notes
-  </div>
+      <div style={{ color: "orange", marginBottom: "10px" }}>
+      ⚠️ Only the first part of this long video was used to generate notes
+      </div>
 )}
 
       <p><strong>Summary:</strong> {notes.summary}</p>
 
       {
-  notes.sections.map((section, i) => (
+       notes.sections.map((section, i) => (
     <div key={i}>
       <h3>{section.heading}</h3>
       <ul>
@@ -218,7 +282,7 @@ const getRemaining = () => {
           <li key={j}>{point}</li>
         ))}
       </ul>
-    </div>
+        </div>
   ))
 }
     </div>
@@ -230,8 +294,8 @@ const getRemaining = () => {
 ) : (
   "Your notes will appear here..."
 )}
-{notes && (
-  <div className="feedback-container">
+      </div>
+       <div className="feedback-container">
     <a
       href="https://forms.gle/sqXMK3tqErgeHtr28"
       target="_blank"
@@ -242,8 +306,6 @@ const getRemaining = () => {
       Help us improve 🚀
     </a>
   </div>
-)}
-      </div>
     </div>
   );
 }
