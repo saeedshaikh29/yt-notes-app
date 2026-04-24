@@ -66,7 +66,7 @@ const handleGenerate = async () => {
     return match ? match[1] : null;
   }
 const handleDownloadPDF = () => {
-  if (!notes || !notes.key_points) return;
+  if (!notes || !notes.sections) return;
 
   const doc = new jsPDF();
 
@@ -92,20 +92,27 @@ const handleDownloadPDF = () => {
   doc.text("Key Points:", 10, y);
   y += 8;
 
-  notes.key_points.forEach((point) => {
+  notes.sections.forEach((section) => {
+  doc.text(section.heading, 10, y);
+  y += 8;
+
+  section.points.forEach((point) => {
     const lines = doc.splitTextToSize(`• ${point}`, 180);
     doc.text(lines, 10, y);
     y += lines.length * 7;
 
-    // Prevent overflow
     if (y > 280) {
       doc.addPage();
       y = 10;
     }
   });
 
+  y += 5;
+});
+
   doc.save(`${notes.title || "notes"}.pdf`);
 };
+const isDev = import.meta.env.MODE === "development";
 // 🔥 DAILY LIMIT CONFIG
 const DAILY_LIMIT = 3;
 
@@ -139,6 +146,9 @@ const incrementUsage = () => {
 
 // 🔥 Check if user has hit the daily limit
 const hasReachedLimit = () => {
+  // 🔥 DEV MODE = NO LIMIT
+  if (isDev) return false;
+
   const usage = checkUsage();
   return usage.count >= DAILY_LIMIT;
 };
@@ -151,8 +161,9 @@ const getRemaining = () => {
   return (
     <div className="container">
       <h1 className="heading">
-        Turn hours of YouTube lectures into beautiful notes
+        Turn messy YouTube lectures into clear, exam-ready notes in seconds
       </h1>
+      <h4 className="sub-heading">Paste a video link and get structured notes with key concepts, examples, and summaries</h4>
 
       <div className="input-group">
         <input
@@ -171,11 +182,11 @@ const getRemaining = () => {
         </button>
       </div>
 <p className="usage-text">
-  Generation(s) remaining today: {getRemaining()}
+  Generation(s) remaining for today : {getRemaining()}
 </p>
       <div className="output">
         {error && <div style={{ color: "red" }}>{error}</div>}
-        {notes && notes.key_points && (
+        {notes && notes.sections && (
           <div className="download-container">
   <button onClick={handleDownloadPDF} className="button">
     Download PDF
@@ -187,7 +198,7 @@ const getRemaining = () => {
 {loading ? (
   <div>Generating notes... ⏳</div>
 ) : error ? null : notes ? (
-  notes.key_points ? (
+  notes.sections ? (
     <div className="notes">
       <h2>{notes.title}</h2>
       {notes.truncated && (
@@ -198,11 +209,18 @@ const getRemaining = () => {
 
       <p><strong>Summary:</strong> {notes.summary}</p>
 
+      {
+  notes.sections.map((section, i) => (
+    <div key={i}>
+      <h3>{section.heading}</h3>
       <ul>
-        {notes.key_points.map((point, index) => (
-          <li key={index}>{point}</li>
+        {section.points.map((point, j) => (
+          <li key={j}>{point}</li>
         ))}
       </ul>
+    </div>
+  ))
+}
     </div>
   ) : (
     <div style={{ color: "red" }}>
@@ -211,6 +229,19 @@ const getRemaining = () => {
   )
 ) : (
   "Your notes will appear here..."
+)}
+{notes && (
+  <div className="feedback-container">
+    <a
+      href="https://forms.gle/sqXMK3tqErgeHtr28"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="button"
+      style={{ marginTop: "20px", display: "inline-block" }}
+    >
+      Help us improve 🚀
+    </a>
+  </div>
 )}
       </div>
     </div>

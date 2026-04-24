@@ -59,33 +59,58 @@ def get_notes(video_id):
         response = client.chat.completions.create(
     model="gpt-4o-mini",
     max_tokens=800,
-    messages=[
-        {
-            "role": "system",
-            "content": "You are a helpful teacher. Convert transcripts into structured study notes."
-        },
-        {
-            "role": "user",
-            "content": f"""
-Convert this transcript into JSON format:
+   messages=[
+    {
+        "role": "system",
+        "content": "You are an expert teacher who creates exam-ready, structured study notes from lecture transcripts."
+    },
+    {
+        "role": "user",
+        "content": f"""
+Convert this transcript into structured, exam-ready study notes.
+
+Return STRICT JSON in this format:
 
 {{
-  "title": "short clear title",
-  "summary": "2-3 sentence summary",
-  "key_points": ["as many bullet points as needed to fully cover the topic"]
+  "title": "Clear topic name",
+  "summary": "2-3 sentence high-level overview",
+  "sections": [
+    {{
+      "heading": "Section name (e.g., Definition, Properties, Types, Examples)",
+      "points": [
+        "Clear, exam-ready explanation",
+        "Include definitions, properties, behaviors where relevant",
+        "Use simple, easy-to-understand language"
+      ]
+    }}
+  ]
 }}
 
-Rules:
-- Do NOT limit to 3 points
-- Include all important concepts
-- Each point should be clear and informative (not too short)
-- Avoid fluff
+Guidelines:
+- Focus ONLY on important, exam-relevant information
+- IGNORE filler, jokes, repetition, and storytelling
+- Group related ideas into sections
+- Use headings like:
+  - Definition
+  - Key Concepts
+  - Properties
+  - Types
+  - Examples
+  - Applications
+- Each point must be clear and self-contained
+- Do NOT just rewrite the transcript
+- Do NOT include unnecessary sentences
+- Write points in an exam-ready style:
+  - Prefer definitions, facts, rules, and clear statements
+  - Avoid vague sentences like "helps in understanding"
+- Keep sentences concise and direct
+- Prioritize information that can be memorized or written in exams
 
-Transcript (may be partial if video is long):
+Transcript:
 {full_text}
 """
-        },
-    ],
+    },
+],
 )
 
         # notes = response.choices[0].message.content

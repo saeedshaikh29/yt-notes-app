@@ -20,6 +20,16 @@
   max-width: 600px;
   font-size: 28px;
   font-weight: bold;
+  margin-bottom: 6px; /* 🔥 reduces gap */
+}
+
+.sub-heading {
+  text-align: center;
+  max-width: 600px;
+  font-size: 16px; /* 🔥 slightly smaller */
+  color: #666; /* 🔥 softer, less attention */
+  margin-top: 0; /* 🔥 remove extra spacing */
+  line-height: 1.4; /* 🔥 cleaner readability */
 }
 
 .input {
@@ -135,4 +145,9 @@
   .output {
     padding: 30px; /* 🔥 ADDED: more spacing for larger screen */
   }
+}
+.feedback-container {
+  display: flex;
+  justify-content: center; /* 🔥 centers horizontally */
+  margin-top: 20px;
 }
