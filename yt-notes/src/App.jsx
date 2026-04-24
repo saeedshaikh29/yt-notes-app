@@ -33,7 +33,12 @@ const handleGenerate = async () => {
   try {
     // const response = await fetch(`http://127.0.0.1:5000/notes/${id}`);
     // const response = await fetch(`https://your-app-name.onrender.com/notes/${id}`);
-    const response = await fetch(`https://yt-notes-app-qpas.onrender.com/notes/${id}`);
+    // const response = await fetch(`https://yt-notes-app-qpas.onrender.com/notes/${id}`);
+    const API_BASE =
+  import.meta.env.MODE === "development"
+    ? "http://127.0.0.1:5000"
+    : import.meta.env.VITE_API_BASE;
+    const response = await fetch(`${API_BASE}/notes/${id}`);
     const data = await response.json();
 
     if (data.error) {
