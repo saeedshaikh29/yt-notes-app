@@ -68,7 +68,7 @@ setError("You've reached today's free limit. Try again tomorrow, or share feedba
     return match ? match[1] : null;
   }
 const handleDownloadPDF = () => {
-  if (!notes || !notes.sections) return;
+  if (!notes || (!notes.sections && !notes.key_points)) return;
 
   const doc = new jsPDF();
 
@@ -94,11 +94,26 @@ const handleDownloadPDF = () => {
   doc.text("Key Points:", 10, y);
   y += 8;
 
+if (notes.sections) {
   notes.sections.forEach((section) => {
-  doc.text(section.heading, 10, y);
-  y += 8;
+    doc.text(section.heading, 10, y);
+    y += 8;
 
-  section.points.forEach((point) => {
+    section.points.forEach((point) => {
+      const lines = doc.splitTextToSize(`• ${point}`, 180);
+      doc.text(lines, 10, y);
+      y += lines.length * 7;
+
+      if (y > 280) {
+        doc.addPage();
+        y = 10;
+      }
+    });
+
+    y += 5;
+  });
+} else if (notes.key_points) {
+  notes.key_points.forEach((point) => {
     const lines = doc.splitTextToSize(`• ${point}`, 180);
     doc.text(lines, 10, y);
     y += lines.length * 7;
@@ -108,14 +123,12 @@ const handleDownloadPDF = () => {
       y = 10;
     }
   });
-
-  y += 5;
-});
+}
 
   doc.save(`${notes.title || "notes"}.pdf`);
 };
 const handleDownloadDOCX = async () => {
-  if (!notes || !notes.sections) return;
+  if (!notes || (!notes.sections && !notes.key_points)) return;
 
   const doc = new Document({
     sections: [
@@ -143,24 +156,35 @@ const handleDownloadDOCX = async () => {
             ],
           }),
 
-          // Sections
-          ...notes.sections.flatMap((section) => [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `\n${section.heading}`,
-                  bold: true,
-                }),
-              ],
-            }),
+          // Sections or Key Points
+// Sections or Key Points
+// Sections or Key Points
+...(notes.sections
+  ? notes.sections.flatMap((section) => [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `\n${section.heading}`,
+            bold: true,
+          }),
+        ],
+      }),
 
-            ...section.points.map(
-              (point) =>
-                new Paragraph({
-                  text: `• ${point}`,
-                })
-            ),
-          ]),
+      ...section.points.map(
+        (point) =>
+          new Paragraph({
+            text: `• ${point}`,
+          })
+      ),
+    ])
+  : notes.key_points
+  ? notes.key_points.map(
+      (point) =>
+        new Paragraph({
+          text: `• ${point}`,
+        })
+    )
+  : []),
         ],
       },
     ],
@@ -243,7 +267,7 @@ const getRemaining = () => {
 </p>
       <div className="output">
         {error && <div style={{ color: "red" }}>{error}</div>}
-        {notes && notes.sections && (
+        {notes && (notes.sections || notes.key_points) && (
           <div className="download-container">
 <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
   <button onClick={handleDownloadPDF} className="button">
@@ -265,26 +289,39 @@ const getRemaining = () => {
   notes.sections ? (
     <div className="notes">
       <h2>{notes.title}</h2>
+
       {notes.truncated && (
-      <div style={{ color: "orange", marginBottom: "10px" }}>
-      ⚠️ Only the first part of this long video was used to generate notes
-      </div>
-)}
+        <div style={{ color: "orange", marginBottom: "10px" }}>
+          ⚠️ Only the first part of this long video was used to generate notes
+        </div>
+      )}
 
       <p><strong>Summary:</strong> {notes.summary}</p>
 
-      {
-       notes.sections.map((section, i) => (
-    <div key={i}>
-      <h3>{section.heading}</h3>
+      {notes.sections.map((section, i) => (
+        <div key={i}>
+          <h3>{section.heading}</h3>
+          <ul>
+            {section.points.map((point, j) => (
+              <li key={j}>{point}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  ) : notes.key_points ? (
+    // ✅ NEW FALLBACK UI
+    <div className="notes">
+      <h2>{notes.title}</h2>
+
+      <p><strong>Summary:</strong> {notes.summary}</p>
+
+      <h3>Key Points</h3>
       <ul>
-        {section.points.map((point, j) => (
-          <li key={j}>{point}</li>
+        {notes.key_points.map((point, i) => (
+          <li key={i}>{point}</li>
         ))}
       </ul>
-        </div>
-  ))
-}
     </div>
   ) : (
     <div style={{ color: "red" }}>
